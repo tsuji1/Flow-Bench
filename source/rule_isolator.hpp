@@ -22,6 +22,13 @@ public:
 std::unique_ptr<UDRuleSet> RuleIsolator::operator()() {
     auto ruleSet = std::make_unique<UDRuleSet>();
     bool enableFastMode = TraceConfiguration::getInstance().enableFastMode();
+    if (!enableFastMode && TraceConfiguration::getInstance().inputIsIsolated()) {
+        for (const auto& rule : RulePool::getInstance()) {
+            ruleSet->push_back(rule->clone());
+        }
+        ruleSet->sortByAvailableWidth();
+        return ruleSet;
+    }
     if (!enableFastMode) {
         std::vector<IsolateRuleSet> isolateRuleSets;
         for (const auto& rule : RulePool::getInstance()) {

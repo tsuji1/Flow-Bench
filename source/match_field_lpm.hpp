@@ -35,6 +35,11 @@ public:
 
     void setParent(const MatchField& parent) override;
     std::unique_ptr<Integer> hit() const override {
+        // shifting by the full bit width is undefined (x86 leaves the value unchanged),
+        // which turned host routes into random addresses
+        if (prefixLength >= getBitCount<T>()) {
+            return std::make_unique<T>(prefix);
+        }
         T suffix = Random::getInstance().nextAs<T>() >> prefixLength;
         return std::make_unique<T>(prefix | suffix);
     }

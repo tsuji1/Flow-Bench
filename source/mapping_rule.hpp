@@ -29,7 +29,7 @@ public:
 
 uint32_t RuleMapping::findNearestUnvisited(uint32_t index, uint32_t lowerBound) const {
     uint32_t r = index;
-    while (visited[r] && r < visited.size()) {
+    while (r < visited.size() && visited[r]) {
         r++;
     }
     if (r == visited.size()) {

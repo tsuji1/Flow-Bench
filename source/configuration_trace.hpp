@@ -44,6 +44,8 @@ private:
 
     // enable fast mode (--fast)
     bool fastMode = false;
+    // input rules are already disjoint (--isolated): skip the O(n^2) rule isolation
+    bool isolatedInput = false;
 
     // whether use pre-defined protocol is set in RuleTypeUd (-p)
 
@@ -85,6 +87,10 @@ public:
         return outputStyle;
     }
 
+    bool inputIsIsolated() const {
+        return isolatedInput;
+    }
+
     bool enableFastMode() const {
         return fastMode;
     }
@@ -124,6 +130,8 @@ TraceConfiguration::TraceConfiguration(int argc, char* argv[]) {
             outputStyle = RuleOutputStyle::ClassBench;
         } else if (strcmp(argv[i], "--fast") == 0) {
             fastMode = true;
+        } else if (strcmp(argv[i], "--isolated") == 0) {
+            isolatedInput = true;
         } else if (strcmp(argv[i], "-p") == 0) {
             RuleTypeUD::getInstance().setProtocol(getEnumValue<Protocol>(argv[++i]));
         } else {
