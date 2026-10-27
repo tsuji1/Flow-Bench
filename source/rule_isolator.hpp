@@ -28,7 +28,7 @@ std::unique_ptr<UDRuleSet> RuleIsolator::operator()() {
         && TraceConfiguration::getInstance().enableIsolatedInputVerification()) {
         std::pair<uint32_t, uint32_t> overlapping;
         if (RuleSetVerifier::getInstance()(RulePool::getInstance(), overlapping)) {
-            // rule numbers are in input order, starting from 1
+            // rule の番号は入力順で 1 から数える
             std::cerr << "--isolated: input rules " << overlapping.first + 1 << " and " << overlapping.second + 1
                       << " overlap" << std::endl;
             std::cerr << "  " << RulePool::getInstance().getRule(overlapping.first) << std::endl;

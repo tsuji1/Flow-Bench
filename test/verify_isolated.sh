@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Tests for the --isolated input verification (source/rule_set_verify.hpp).
+# --isolated の入力検査（source/rule_set_verify.hpp）のテスト。
 #
-# usage: test/verify_isolated.sh [disjoint rule file] [overlapping rule file]
-#   disjoint rule file:    1-field LPM rules that must pass (e.g. the output of fib_to_flowbench.py)
-#   overlapping rule file: a raw FIB ("<ip> <len> <nexthop>" per line) that must fail;
-#                          it is converted to "@ip/len" without the default route
-# Both are optional; the small built-in cases always run.
+# 使い方: test/verify_isolated.sh [重なりのない rule file] [生の FIB]
+#   重なりのない rule file: 通るべき 1 field の LPM rule（例: fib_to_flowbench.py の出力）
+#   生の FIB:               失敗するべき FIB（1 行 "<ip> <len> <nexthop>"）。
+#                           default route を除いて "@ip/len" に変換して渡す
+# どちらも省略できる。小さい内蔵ケースは常に実行する。
 
 set -u
 cd "$(dirname "$0")/.."
@@ -17,7 +17,7 @@ g++ -std=c++17 -O2 source/trace_generator.cpp -o "$BIN" || exit 1
 
 FAILED=0
 
-# expect <name> <expected exit code> <expected text in stdout+stderr, or "-" for none> <input file> <flowbench-trace args...>
+# expect <名前> <期待する終了コード> <stdout+stderr に含まれるべき文字列。無ければ "-"> <入力 file> <flowbench-trace の引数...>
 expect() {
     local name=$1 code=$2 text=$3 input=$4
     shift 4
@@ -47,10 +47,10 @@ printf '@1.0.0.0/24\n@1.0.1.0/24\n@2.0.0.0/8\n@1.0.2.0/23\n' >"$WORK/disjoint1.t
 printf '@1.0.0.0/24\n@2.0.0.0/8\n@1.0.0.0/16\n' >"$WORK/nested1.txt"
 printf '@1.0.0.0/24\n@3.0.0.0/8\n@1.0.0.0/24\n' >"$WORK/duplicate1.txt"
 printf '@1.0.0.0/32\n@1.0.0.1/32\n@1.0.0.0/31\n' >"$WORK/host1.txt"
-# a host route followed by a larger address: fails if getMax() of a /32 is wrong
+# host route の後ろに大きいアドレス: /32 の getMax() が誤っていると失敗する
 printf '@1.0.0.1/32\n@1.0.1.0/24\n@9.0.0.0/8\n' >"$WORK/host-disjoint1.txt"
-# rules 1 and 2 overlap only in field 0, rules 1 and 3 overlap in both fields:
-# the pair is not adjacent after sorting by field 0
+# rule 1 と 2 は field 0 だけ重なり、rule 1 と 3 は両方の field で重なる:
+# 重なる組は field 0 でソートしたとき隣にならない
 printf '@1.0.0.0/8 10.0.0.0/8\n@1.0.0.0/16 20.0.0.0/8\n@1.1.0.0/16 10.1.0.0/16\n' >"$WORK/overlap2.txt"
 printf '@1.0.0.0/8 10.0.0.0/8\n@1.0.0.0/16 20.0.0.0/8\n@1.1.0.0/16 30.0.0.0/8\n' >"$WORK/disjoint2.txt"
 

@@ -46,7 +46,7 @@ private:
     bool fastMode = false;
     // 入力 rule が既に互いに重ならない（--isolated）: O(n^2) の rule isolation を飛ばす
     bool isolatedInput = false;
-    // check that the --isolated input rules do not overlap (disable with --no-verify)
+    // --isolated の入力 rule が重ならないかを検査する（--no-verify で飛ばす）
     bool verifyIsolatedInput = true;
 
     // whether use pre-defined protocol is set in RuleTypeUd (-p)

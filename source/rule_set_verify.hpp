@@ -1,10 +1,10 @@
 #pragma once
 
-// verify that the rules given with --isolated do not overlap with each other
-// rules are sorted by the range of field 0, and each rule is compared only with
-// the following rules whose field-0 range starts before it ends
-// 1-field rules: O(n log n), since only adjacent rules are compared when the set is disjoint
-// multi-field rules: O(n^2 * m) in the worst case (e.g., field 0 is a wildcard in every rule)
+// --isolated で渡された rule が互いに重ならないことを確かめる
+// rule を field 0 の範囲の始点でソートし、各 rule を「field 0 の始点が自分の終点以下」の
+// 後ろの rule とだけ比べる
+// 1 field: 重なりがなければ隣の rule としか比べないので O(n log n)
+// 多 field: 最悪 O(n^2 * m)（全 rule で field 0 が wildcard のときなど）
 
 #include <algorithm>
 #include <numeric>
@@ -27,7 +27,7 @@ private:
 public:
     RuleSetVerifier() = default;
 
-    // return true if two rules overlap, and set their indexes to overlapping
+    // 重なる 2 つの rule があれば true を返し、その index を overlapping に入れる
     bool operator()(const UDRuleSet& ruleSet, std::pair<uint32_t, uint32_t>& overlapping) const;
 };
 
@@ -37,14 +37,14 @@ bool RuleSetVerifier::findOverlap(const UDRuleSet& ruleSet, std::pair<uint32_t, 
     mins.reserve(ruleSet.size());
     maxs.reserve(ruleSet.size());
     for (const auto& rule : ruleSet) {
-        // every field is a SizedField (EM, LPM, and RM), see RuleType::createField
+        // field はすべて SizedField（EM・LPM・RM）。RuleType::createField を参照
         const auto& field = static_cast<const SizedField<T>&>(rule->getField(0));
         mins.push_back(field.getMin());
         maxs.push_back(field.getMax());
     }
     std::vector<uint32_t> order(ruleSet.size());
     std::iota(order.begin(), order.end(), 0);
-    // ties are broken by input order so that the reported pair is deterministic
+    // 始点が同じなら入力順で並べ、報告する組を毎回同じにする
     std::sort(order.begin(), order.end(), [&](uint32_t a, uint32_t b) {
         return mins[a] < mins[b] || (!(mins[b] < mins[a]) && a < b);
     });
