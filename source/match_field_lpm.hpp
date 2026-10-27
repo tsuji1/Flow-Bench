@@ -59,6 +59,11 @@ public:
     }
 
     T getMax() const override {
+        // same as hit(): shifting by the full bit width is undefined, and on x86 the
+        // range of a host route became [prefix, max], overlapping every larger address
+        if (prefixLength >= getBitCount<T>()) {
+            return prefix;
+        }
         return prefix | (getMaxOf<T>() >> prefixLength);
     }
 
