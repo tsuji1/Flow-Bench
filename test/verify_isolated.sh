@@ -47,6 +47,8 @@ printf '@1.0.0.0/24\n@1.0.1.0/24\n@2.0.0.0/8\n@1.0.2.0/23\n' >"$WORK/disjoint1.t
 printf '@1.0.0.0/24\n@2.0.0.0/8\n@1.0.0.0/16\n' >"$WORK/nested1.txt"
 printf '@1.0.0.0/24\n@3.0.0.0/8\n@1.0.0.0/24\n' >"$WORK/duplicate1.txt"
 printf '@1.0.0.0/32\n@1.0.0.1/32\n@1.0.0.0/31\n' >"$WORK/host1.txt"
+# a host route followed by a larger address: fails if getMax() of a /32 is wrong
+printf '@1.0.0.1/32\n@1.0.1.0/24\n@9.0.0.0/8\n' >"$WORK/host-disjoint1.txt"
 # rules 1 and 2 overlap only in field 0, rules 1 and 3 overlap in both fields:
 # the pair is not adjacent after sorting by field 0
 printf '@1.0.0.0/8 10.0.0.0/8\n@1.0.0.0/16 20.0.0.0/8\n@1.1.0.0/16 10.1.0.0/16\n' >"$WORK/overlap2.txt"
@@ -56,6 +58,7 @@ expect 1field-disjoint       0 "Isolated input verified: 4 rules" "$WORK/disjoin
 expect 1field-nested         1 "input rules 1 and 3 overlap"      "$WORK/nested1.txt"     "${LPM1[@]}" --isolated
 expect 1field-duplicate      1 "input rules 1 and 3 overlap"      "$WORK/duplicate1.txt"  "${LPM1[@]}" --isolated
 expect 1field-host-route     1 "overlap"                          "$WORK/host1.txt"       "${LPM1[@]}" --isolated
+expect 1field-host-disjoint  0 "Isolated input verified: 3 rules" "$WORK/host-disjoint1.txt" "${LPM1[@]}" --isolated
 expect 2field-overlap        1 "input rules 1 and 3 overlap"      "$WORK/overlap2.txt"    "${LPM2[@]}" --isolated
 expect 2field-disjoint       0 "Isolated input verified: 3 rules" "$WORK/disjoint2.txt"   "${LPM2[@]}" --isolated
 expect no-verify             0 -                                  "$WORK/nested1.txt"     "${LPM1[@]}" --isolated --no-verify
