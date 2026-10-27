@@ -7,8 +7,12 @@
 // if rule-level spatial locality is not specified
 //       or fast mode is enabled, we omit this step and use the original rule pool
 
+#include <iostream>
+
+#include "rule_output.hpp"
 #include "rule_pool.hpp"
 #include "rule_set_isolate.hpp"
+#include "rule_set_verify.hpp"
 
 namespace flowbench {
 
@@ -20,6 +24,19 @@ public:
 };
 
 std::unique_ptr<UDRuleSet> RuleIsolator::operator()() {
+    if (TraceConfiguration::getInstance().inputIsIsolated()
+        && TraceConfiguration::getInstance().enableIsolatedInputVerification()) {
+        std::pair<uint32_t, uint32_t> overlapping;
+        if (RuleSetVerifier::getInstance()(RulePool::getInstance(), overlapping)) {
+            // rule の番号は入力順で 1 から数える
+            std::cerr << "--isolated: input rules " << overlapping.first + 1 << " and " << overlapping.second + 1
+                      << " overlap" << std::endl;
+            std::cerr << "  " << RulePool::getInstance().getRule(overlapping.first) << std::endl;
+            std::cerr << "  " << RulePool::getInstance().getRule(overlapping.second) << std::endl;
+            exit(1);
+        }
+        std::cout << "Isolated input verified: " << RulePool::getInstance().size() << " rules, no overlap" << std::endl;
+    }
     auto ruleSet = std::make_unique<UDRuleSet>();
     bool enableFastMode = TraceConfiguration::getInstance().enableFastMode();
     if (!enableFastMode && TraceConfiguration::getInstance().inputIsIsolated()) {

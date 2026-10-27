@@ -46,6 +46,8 @@ private:
     bool fastMode = false;
     // 入力 rule が既に互いに重ならない（--isolated）: O(n^2) の rule isolation を飛ばす
     bool isolatedInput = false;
+    // --isolated の入力 rule が重ならないかを検査する（--no-verify で飛ばす）
+    bool verifyIsolatedInput = true;
 
     // whether use pre-defined protocol is set in RuleTypeUd (-p)
 
@@ -91,6 +93,10 @@ public:
         return isolatedInput;
     }
 
+    bool enableIsolatedInputVerification() const {
+        return verifyIsolatedInput;
+    }
+
     bool enableFastMode() const {
         return fastMode;
     }
@@ -132,6 +138,8 @@ TraceConfiguration::TraceConfiguration(int argc, char* argv[]) {
             fastMode = true;
         } else if (strcmp(argv[i], "--isolated") == 0) {
             isolatedInput = true;
+        } else if (strcmp(argv[i], "--no-verify") == 0) {
+            verifyIsolatedInput = false;
         } else if (strcmp(argv[i], "-p") == 0) {
             RuleTypeUD::getInstance().setProtocol(getEnumValue<Protocol>(argv[++i]));
         } else {
