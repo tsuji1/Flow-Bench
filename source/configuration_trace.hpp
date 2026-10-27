@@ -44,7 +44,7 @@ private:
 
     // enable fast mode (--fast)
     bool fastMode = false;
-    // input rules are already disjoint (--isolated): skip the O(n^2) rule isolation
+    // 入力 rule が既に互いに重ならない（--isolated）: O(n^2) の rule isolation を飛ばす
     bool isolatedInput = false;
 
     // whether use pre-defined protocol is set in RuleTypeUd (-p)
