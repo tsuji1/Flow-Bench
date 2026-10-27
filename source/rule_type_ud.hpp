@@ -2,6 +2,7 @@
 
 // user-defined rule type
 
+#include <array>
 #include <vector>
 
 #include "rule_type_ipv4.hpp"

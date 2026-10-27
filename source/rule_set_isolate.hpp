@@ -43,6 +43,11 @@ bool IsolateRuleSet::splitBy(const UDRule& rule) {
     for (uint32_t i = 0; i < size(); i++) {
         auto& r = getRule(i);
         if (getDifferentFields(r, rule)) {
+            // r が rule と全く同じ: 完全に覆われているので捨てる
+            // （捨てないと makeCartesianProduct が差分 0 個の field で無限ループする）
+            if (differentFields.empty()) {
+                continue;
+            }
             if (getDifferentFieldValues(r, rule)) {
                 makeCartesianProduct(r, temp);
             }

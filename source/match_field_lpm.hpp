@@ -35,6 +35,11 @@ public:
 
     void setParent(const MatchField& parent) override;
     std::unique_ptr<Integer> hit() const override {
+        // bit 幅と同じ量のシフトは未定義動作（x86 では値が変わらない）で、
+        // host route（/32）から random なアドレスが出ていた
+        if (prefixLength >= getBitCount<T>()) {
+            return std::make_unique<T>(prefix);
+        }
         T suffix = Random::getInstance().nextAs<T>() >> prefixLength;
         return std::make_unique<T>(prefix | suffix);
     }
@@ -54,6 +59,11 @@ public:
     }
 
     T getMax() const override {
+        // hit() と同じく bit 幅と同じ量のシフトは未定義動作で、x86 では host route（/32）の
+        // 範囲が [prefix, max] になり、それより大きいアドレスすべてと重なると判定されていた
+        if (prefixLength >= getBitCount<T>()) {
+            return prefix;
+        }
         return prefix | (getMaxOf<T>() >> prefixLength);
     }
 
